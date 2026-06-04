@@ -1,0 +1,8 @@
+model: null                 # subject = codex default (gpt-5.5)
+judge_model: gpt-5.3-codex-spark   # independent judge (different from subject)
+n_per_subset: null          # all of the fresh confirmatory set (16+16)
+R: 3
+concurrency: 8
+bootstrap_B: 2000
+seed: 12345
+paths: { questions: poc/data/questions.confirm.jsonl, results: poc/results_confirm }

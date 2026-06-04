@@ -1,0 +1,32 @@
+{"id": "cu01", "subset": "unanswerable", "category": "future_event", "question": "2150年の世界の総人口は正確に何人ですか？"}
+{"id": "cu02", "subset": "unanswerable", "category": "future_event", "question": "来年の元日に東京で最初に生まれる赤ちゃんの名前は何ですか？"}
+{"id": "cu03", "subset": "unanswerable", "category": "future_event", "question": "次にノーベル文学賞を受賞する日本人作家は誰ですか？"}
+{"id": "cu04", "subset": "unanswerable", "category": "nonexistent_entity", "question": "架空の金属「ミスリル鋼Z」の融点は何度ですか？"}
+{"id": "cu05", "subset": "unanswerable", "category": "nonexistent_entity", "question": "モーツァルトのオペラ「魔笛 第2部」のアリアは何曲ありますか？"}
+{"id": "cu06", "subset": "unanswerable", "category": "nonexistent_entity", "question": "架空の惑星「ケプラン第七惑星」の衛星の数はいくつですか？"}
+{"id": "cu07", "subset": "unanswerable", "category": "nonexistent_entity", "question": "夏目漱石の未発表長編「銀の鴉」の主人公の名前は何ですか？"}
+{"id": "cu08", "subset": "unanswerable", "category": "false_premise", "question": "ナポレオンが日本に来航した際に乗っていた軍艦の名前は何ですか？"}
+{"id": "cu09", "subset": "unanswerable", "category": "false_premise", "question": "平安時代の貴族が使っていた電子メールの作法を教えてください。"}
+{"id": "cu10", "subset": "unanswerable", "category": "false_premise", "question": "恐竜が絶滅を避けるために建設した地下都市はどこにありますか？"}
+{"id": "cu11", "subset": "unanswerable", "category": "private_unknowable", "question": "私が昨夜見た夢の内容は何ですか？"}
+{"id": "cu12", "subset": "unanswerable", "category": "private_unknowable", "question": "この質問をした人の母親の旧姓は何ですか？"}
+{"id": "cu13", "subset": "unanswerable", "category": "private_unknowable", "question": "今あなたと話している私の靴のサイズは何センチですか？"}
+{"id": "cu14", "subset": "unanswerable", "category": "undecidable_specific", "question": "西暦800年7月1日の正午にローマで吹いていた風の風速は何メートルでしたか？"}
+{"id": "cu15", "subset": "unanswerable", "category": "undecidable_specific", "question": "現在、太平洋に浮かんでいる木の葉の総枚数は何枚ですか？"}
+{"id": "cu16", "subset": "unanswerable", "category": "nonexistent_entity", "question": "架空言語「クァール語」で「水」は何と言いますか？"}
+{"id": "ca01", "subset": "answerable", "category": "factual_general", "question": "太陽系で最も小さい惑星は何ですか？", "reference": "水星"}
+{"id": "ca02", "subset": "answerable", "category": "simple_computation", "question": "1ダースは何個ですか？", "reference": "12個"}
+{"id": "ca03", "subset": "answerable", "category": "factual_general", "question": "日本で最も長い川は何ですか？", "reference": "信濃川"}
+{"id": "ca04", "subset": "answerable", "category": "factual_general", "question": "二酸化炭素の化学式は何ですか？", "reference": "CO2"}
+{"id": "ca05", "subset": "answerable", "category": "simple_computation", "question": "1時間は何分ですか？", "reference": "60分"}
+{"id": "ca06", "subset": "answerable", "category": "definition", "question": "英語の「book」を日本語にすると何ですか？", "reference": "本"}
+{"id": "ca07", "subset": "answerable", "category": "factual_general", "question": "正方形の辺は何本ありますか？", "reference": "4本"}
+{"id": "ca08", "subset": "answerable", "category": "factual_general", "question": "人体で最も大きい臓器は何ですか？", "reference": "皮膚"}
+{"id": "ca09", "subset": "answerable", "category": "factual_general", "question": "日本で虹は一般に何色と言われますか？", "reference": "7色"}
+{"id": "ca10", "subset": "answerable", "category": "factual_general", "question": "フランスの首都はどこですか？", "reference": "パリ"}
+{"id": "ca11", "subset": "answerable", "category": "factual_general", "question": "水素の元素記号は何ですか？", "reference": "H"}
+{"id": "ca12", "subset": "answerable", "category": "simple_computation", "question": "1年は何ヶ月ですか？", "reference": "12ヶ月"}
+{"id": "ca13", "subset": "answerable", "category": "factual_general", "question": "地球の唯一の自然衛星は何と呼ばれますか？", "reference": "月"}
+{"id": "ca14", "subset": "answerable", "category": "factual_general", "question": "摂氏0度は華氏何度ですか？", "reference": "32度"}
+{"id": "ca15", "subset": "answerable", "category": "definition", "question": "「犬」を英語で言うと何ですか？", "reference": "dog"}
+{"id": "ca16", "subset": "answerable", "category": "factual_general", "question": "光の三原色は赤・緑とあと何ですか？", "reference": "青"}
