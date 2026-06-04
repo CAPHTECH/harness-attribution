@@ -108,3 +108,20 @@ spark 回復後に自動実行（subject=spark, judge=gpt-5.5, R=1, 192生成中
 4. 方向は確証研究と一貫（H1≈H_para 最低、H_contra 最大、副作用なし: E_correct=1.000, E_over_refusal=0）。
 
 **結論**: 本（低検出力・役割スワップ・低 headroom の）一般化テストでは、効果の被検体間一般化を**確認できなかった**。方向は一貫するが有意でない。クリーンな一般化検証には、headroom のある被検体 ＋ 十分な R/n（＝spark 以外の非クォータ制約モデル）が必要。
+
+## 一般化研究 II（局所OSS被検体, full-power, 事前登録 2026-06-04, 実行前にコミット）
+
+spark 再試行が R=1 低検出力で不確定だったため、**非クォータの局所モデルを第2被検体**にして full-power で再検証する。被検体=`gemma4:e4b`（`codex exec --oss --local-provider ollama`、無料・無制限）、独立判定=gpt-5.5、**R=3 に復帰**（局所は非クォータ）。同一新規32問・定義・条件・stats・判定規則は不変。`config.generalize-oss.yaml`。
+
+### 予測（データ生成前に固定）
+- 効果が被検体に一般化するなら: H1 < H0_ablate かつ H1 < H_base_len（有意）、H_contra 最大。理想は verdict=`meaning_attributable`。
+- **smoke 観察に基づく追加予測**: gemma は H1（「与えられた情報に限定」）を字義通り取り、answerable な一般知識問題でも過剰拒否する兆候があった → **tradeoff_flag=True（E_over_refusal 上昇 / E_correct 低下）の可能性**。これは gpt-5.5 では出なかった副作用で、指示の有用性トレードオフが被検体依存であることを示しうる。
+- gemma の不可知 baseline 作話率は smoke では低め（headroom 小の可能性）。
+
+### 判定規則（事前固定）
+- **一般化**: verdict=`meaning_attributable`、または H1 − H_base_len の95%CIが0未満。
+- **部分的**: H1 < H0_ablate 有意だが包絡線を超えない。
+- **一般化せず**: H1 が baseline と区別できない。
+- **重要**: R=3 で full-power のため、null は「検出力不足」ではなく **headroom 不足/被検体特性**に帰属できる（spark 再試行との違い）。
+- tradeoff_flag は別途報告（判定規則とは独立に、副作用の被検体依存性として）。
+- 結果に合わせた定義・データの事後調整は禁止。

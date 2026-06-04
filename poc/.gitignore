@@ -2,5 +2,6 @@ results/
 results_confirm/
 results_generalize/
 results_generalize_retry/
+results_generalize_oss/
 __pycache__/
 *.pyc

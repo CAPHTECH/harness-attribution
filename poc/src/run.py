@@ -120,6 +120,7 @@ def generate_one(
             question=question["question"],
             condition=condition,
             model=config.get("model"),
+            oss_provider=config.get("oss_local_provider"),
         )
     raw = {
         "question_id": question["id"],

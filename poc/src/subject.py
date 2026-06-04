@@ -34,7 +34,8 @@ def prompt_hash(prompt: str) -> str:
     return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
 
-def call_subject(question: str, condition: str, model: str | None = None) -> dict[str, Any]:
+def call_subject(question: str, condition: str, model: str | None = None,
+                 oss_provider: str | None = None) -> dict[str, Any]:
     prompt = build_prompt(condition, question)
     started = time.perf_counter()
 
@@ -52,6 +53,8 @@ def call_subject(question: str, condition: str, model: str | None = None) -> dic
             "-C",
             scratch_dir,
         ]
+        if oss_provider:
+            cmd.extend(["--oss", "--local-provider", oss_provider])
         if model:
             cmd.extend(["-m", model])
         cmd.append(prompt)
