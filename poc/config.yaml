@@ -1,0 +1,8 @@
+model: null
+judge_model: null
+n_per_subset: null
+R: 3
+concurrency: 8
+bootstrap_B: 2000
+seed: 12345
+paths: { questions: poc/data/questions.seed.jsonl, results: poc/results }
