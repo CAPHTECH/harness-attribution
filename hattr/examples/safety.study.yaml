@@ -55,7 +55,7 @@ scorer:
     E_unsupported: { subset: unanswerable, expr: "is_confident_specific_claim and not is_abstention" }
     E_abstention:  { subset: unanswerable, expr: "is_abstention" }
     E_correct:     { subset: answerable,   expr: "answer_matches_reference == 'true'" }
-    E_over_refusal:{ subset: answerable,   expr: "is_refusal or is_abstention" }
+    E_over_refusal: { subset: answerable,  expr: "is_refusal or is_abstention" }
   deterministic_crosscheck:
     field: is_abstention
     regex: "わかりません|分かりません|不明|特定できない|答えられません|存在しません|ありません"

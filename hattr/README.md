@@ -10,6 +10,10 @@ python -m hattr.cli run hattr/examples/codegen.study.yaml [--limit N] [--mock]
 
 # 事前登録（config を凍結ハッシュ化。timestamp は明示引数）
 python -m hattr.cli preregister hattr/examples/codegen.study.yaml --timestamp 2026-06-05T00:00:00Z
+
+# envelope/paraphrase を生成器モデルで自動生成し study に書き戻す（単一文字列 variant のみ。
+# 生成→人間レビュー→preregister の流れ。既存値は上書きしない）
+python -m hattr.cli autogen STUDY.yaml --timestamp 2026-06-05T00:00:00Z [--generator-model M]
 ```
 
 出力は `results_dir`（既定 `hattr_runs/<name>/`、git無視）に `report.md` / `scored.csv` / `run_meta.json` / `raw/`。依存は標準ライブラリ + numpy + pyyaml のみ。
@@ -19,7 +23,7 @@ python -m hattr.cli preregister hattr/examples/codegen.study.yaml --timestamp 20
 | 種別 | 選択肢 |
 | --- | --- |
 | **被検体（SubjectAdapter）** | `codex`（codex exec, cloud／`--oss` ローカル）, `openai_compat`（OpenAI互換HTTP＝ollama/OpenAI/任意エンドポイント） |
-| **採点（Scorer）** | `execution`（隔離subprocessで隠しテスト実行＝決定的, scorer-bias 無し）, `llm_judge`（別モデルで盲検判定＋決定的クロスチェック）, `regex` |
+| **採点（Scorer）** | `execution`（隔離subprocessで隠しテスト実行＝決定的, scorer-bias 無し。`sandbox: seatbelt`(既定)で macOS Seatbelt によりネットワーク遮断・workdir 外書込遮断・resource 制限。`sandbox-exec` 不在なら明確エラー）, `llm_judge`（別モデルで盲検判定＋決定的クロスチェック）, `regex` |
 | **条件** | 固定6種 H1/H0_ablate/H0_neutral/H_base_len(包絡線)/H_para/H_contra を `base_prompt`＋`variants` で定義 |
 | **分析** | primary/secondary イベント, polarity(minimize/maximize), baselines, 課題クラスタ bootstrap CI, verdict(meaning_attributable/surface_confound/fragile/inconclusive), tradeoff_flag |
 

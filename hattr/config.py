@@ -54,9 +54,7 @@ class StudyConfig:
 
 def load_study(path: str | Path) -> StudyConfig:
     study_path = Path(path).resolve()
-    text = study_path.read_text(encoding="utf-8")
-    text = re.sub(r"^(\s*[^#\n][^:\n]+):\{", r"\1: {", text, flags=re.MULTILINE)
-    raw = yaml.safe_load(text) or {}
+    raw = load_raw_study_yaml(study_path)
     _validate(raw, study_path)
     return StudyConfig(
         path=study_path,
@@ -70,6 +68,13 @@ def load_study(path: str | Path) -> StudyConfig:
         protocol=dict(raw.get("protocol", {})),
         raw=raw,
     )
+
+
+def load_raw_study_yaml(path: str | Path) -> dict[str, Any]:
+    study_path = Path(path).resolve()
+    text = study_path.read_text(encoding="utf-8")
+    text = re.sub(r"^(\s*[^#\n][^:\n]+):\{", r"\1: {", text, flags=re.MULTILINE)
+    return yaml.safe_load(text) or {}
 
 
 def load_jsonl(path: str | Path, limit: int | None = None) -> list[dict[str, Any]]:
