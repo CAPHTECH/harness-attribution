@@ -74,3 +74,9 @@ auto-verdict = `meaning_attributable`。判定規則により **再現成功（c
 - **部分的**: H1 < H0_ablate は有意だが包絡線を超えない。
 - **一般化せず（subject-specific）**: H1 が H0_ablate/H_base_len と区別できない。
 - 結果に合わせた定義・データの事後調整は禁止。
+
+### 結果（一般化研究, 2026-06-04）: **無効（incomplete）— 測定失敗**
+
+実行したが、被検体 spark の生成 576 件中 **462 件が失敗**（rc=1, `You've hit your usage limit for GPT-5.3-Codex-Spark`）。成功は 114 件のみ、しかも全て unanswerable（answerable は全滅）＝非ランダムな欠損。**有効な verdict は得られない**（残存データ上の auto-verdict は信頼できないので採用しない）。原因は spark の利用上限（本日 spark を判定器として大量使用済み）。事前登録の判定規則は有効データに対するもので、この技術的失敗には適用しない。結論・定義・データは未変更。
+
+**含意**: codex CLI 内で「第2の被検体モデル」を回す手段が現状ない（spark はクォータ制約、gpt-5-codex は exec 不可）。一般化検証には (a) spark クォータ回復後に縮小 n で再試行、(b) 非 codex プロバイダを第2被検体として追加（要セットアップ・codex 限定の前提を外す）、(c) 当面は人手監査で ground truth を確定、のいずれか。
