@@ -38,3 +38,23 @@
 python poc/src/run.py --config poc/config.confirm.yaml
 ```
 （subject=gpt-5.5 生成 → spark+鋭利化 rubric で判定 → 出力 `poc/results_confirm/`。本ファイルのコミット後に実行する。）
+
+---
+
+## 結果（2026-06-04, 事後追記。上記の予測・規則は凍結のまま変更していない）
+
+新規32問・subject=gpt-5.5・独立判定=spark＋鋭利化 rubric（576生成/576判定, 0エラー, judge=gpt-5.3-codex-spark）。
+
+`E_unsupported`（不可知, n=48）: H1=0.083, H_para=0.083, H0_ablate=0.333, H0_neutral=0.333, H_base_len=0.417, **H_contra=0.500（最大）**。
+
+| 予測 | 結果 | 判定 |
+| --- | --- | --- |
+| ① H1 < H0_ablate | 0.083 < 0.333 | ✓ |
+| ② H1 < H_base_len 有意 | CI [−0.542, −0.146] | ✓ |
+| ③ H1 ≈ H_para（CI∋0） | CI [0.000, 0.000] | ✓ |
+| ④ H_contra 最大 | 0.500 で最大 | ✓ |
+| ⑤ 副作用なし | E_correct 0.979(=ablate)・E_over_refusal 0 | ✓ |
+
+auto-verdict = `meaning_attributable`。判定規則により **再現成功（confirmed）**。reliability(棄権regex一致) 0.878。
+
+**結論**: 探索研究の post-hoc な `meaning_attributable` は、独立判定器・凍結した鋭利化定義・新規データの下で再現した。`hyp-meaning` を確証扱いに昇格。残る限界: 単一の被検体(gpt-5.5)・単一の独立判定器(spark)・n=16/subset・人手 ground truth 未確定・interaction 未検証。

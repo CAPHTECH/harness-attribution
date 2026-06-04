@@ -38,6 +38,14 @@ attribution の結論は被検体の挙動だけでなく、**採点器（モデ
 
 **ただし鋭利化定義はデータを見た後に設計した post-hoc であり、同一データへの適用は R1（事前固定）違反。これは確証ではなく探索。** 効果を主張するには、鋭利化定義を**事前登録し新規データで再現**する必要がある。
 
+## 確証研究（pre-registered, 新規データ）→ 再現成功
+
+[`PREREGISTRATION.md`](./PREREGISTRATION.md) に予測・判定規則を**データ生成前にコミット**（commit `d646d9c`）し、seed と重複しない新規32問で検証（subject=gpt-5.5, 独立判定=spark＋鋭利化, 0エラー）。
+
+`E_unsupported`（不可知, n=48）: H1=0.083, H_para=0.083, H0_ablate=0.333, H_base_len=0.417, **H_contra=0.500（最大）**。事前登録の5予測すべて的中（H1<H0_ablate / H1<H_base_len CI[−0.542,−0.146] / H1≈H_para CI[0,0] / H_contra最大 / 副作用なし）。**auto-verdict = `meaning_attributable` → 再現成功**。
+
+→ `hyp-meaning` は探索から**確証**へ。独立判定器（scorer-bias）・包絡線（表層交絡）・言い換え感度・事前登録＋新規データ（post-hoc）の主要対抗仮説を制御した上で、指示が無根拠断定を抑えることが再現した。限界: 単一被検体(gpt-5.5)・単一独立判定器(spark)・n=16/subset・人手 ground truth 未確定・interaction 未検証。
+
 ## 仮説（AdvisoryGraphen 5 仮説）への対応
 
 | 仮説 | 現時点の判定 |
