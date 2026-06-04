@@ -58,3 +58,19 @@ python poc/src/run.py --config poc/config.confirm.yaml
 auto-verdict = `meaning_attributable`。判定規則により **再現成功（confirmed）**。reliability(棄権regex一致) 0.878。
 
 **結論**: 探索研究の post-hoc な `meaning_attributable` は、独立判定器・凍結した鋭利化定義・新規データの下で再現した。`hyp-meaning` を確証扱いに昇格。残る限界: 単一の被検体(gpt-5.5)・単一の独立判定器(spark)・n=16/subset・人手 ground truth 未確定・interaction 未検証。
+
+---
+
+## 一般化研究（第2被検体モデル, 事前登録 2026-06-04, データ生成前にコミット）
+
+確証研究の `meaning_attributable` は被検体 gpt-5.5 限定。外部妥当性を、**被検体を gpt-5.3-codex-spark に替え**て検証する（独立判定は gpt-5.5 に役割スワップ）。設計は `config.generalize.yaml`。入力は同一の `questions.confirm.jsonl`、定義・条件・規模・stats は凍結のまま。被検体と判定器の**両モデルを入れ替えても**効果が再現するかの頑健性テスト。
+
+### 予測（データを見る前に固定。確証研究より確信度は低い＝真の一般化テスト）
+- 効果が被検体モデルに依存しない（hyp-meaning が一般的）なら: H1 < H0_ablate かつ H1 < H_base_len（有意）。理想的には auto-verdict = `meaning_attributable`。
+- spark は別系統モデルゆえ baseline 較正が異なりうる（不可知での棄権傾向が gpt-5.5 と違う可能性）。
+
+### 判定規則（事前固定）
+- **一般化（generalizes）**: verdict = `meaning_attributable`、または最低限 H1 < H_base_len の差の95%CIが0未満。
+- **部分的**: H1 < H0_ablate は有意だが包絡線を超えない。
+- **一般化せず（subject-specific）**: H1 が H0_ablate/H_base_len と区別できない。
+- 結果に合わせた定義・データの事後調整は禁止。
