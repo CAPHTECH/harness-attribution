@@ -1,5 +1,6 @@
 results/
 results_confirm/
 results_generalize/
+results_generalize_retry/
 __pycache__/
 *.pyc

@@ -1,0 +1,8 @@
+model: gpt-5.3-codex-spark   # subject = 2nd model
+judge_model: gpt-5.5         # independent judge
+n_per_subset: null           # same fresh 32-question set
+R: 1                         # quota-forced reduction (576->192 spark calls); questions unchanged
+concurrency: 8
+bootstrap_B: 2000
+seed: 12345
+paths: { questions: poc/data/questions.confirm.jsonl, results: poc/results_generalize_retry }
