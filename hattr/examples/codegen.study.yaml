@@ -1,0 +1,65 @@
+# Reproduces poc/codegen experiment as a declarative hattr study.
+# Factor = detailed spec. Scorer = execution oracle (deterministic; no LLM judge).
+name: codegen-spec
+
+subject:
+  adapter: codex          # codex exec (cloud, default gpt-5.5)
+  model: null
+
+# Force subject output to JSON {code} (harness constant, applied to all conditions).
+output_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    code: { type: string }
+  required: [code]
+
+conditions:
+  # {variant} is replaced by the chosen variant string, THEN the whole prompt is
+  # formatted with the task's fields ({signature}, {spec}, ...). This supports both
+  # append (here) and prepend (see safety example).
+  base_prompt: |
+    Write a Python function with this signature:
+    {signature}
+    Return the complete function definition (plus any needed imports) in the 'code' field. Do not include tests or explanation.{variant}
+  variants:
+    H1: "\n\nSpecification: {spec}"
+    H0_ablate: ""
+    H0_neutral: "\n\nImplement a correct, robust, general-purpose version."
+    H_base_len: "\n\nGeneral tips: choose clear variable names, add a short docstring, follow PEP 8 style, and prefer readable code over clever one-liners."
+    H_para: "\n\nSpecification: {para_spec}"
+    H_contra: "\n\nSpecification: {contra_spec}"
+  factual: H1
+  ablate: H0_ablate
+  neutral: H0_neutral
+  envelope: H_base_len
+  paraphrase: H_para
+  contra: H_contra
+
+tasks:
+  path: poc/codegen/tasks.jsonl
+  cluster_id_field: id      # bootstrap clusters by this
+  # no subset_field -> single subset "all"
+
+scorer:
+  type: execution
+  code_field: code          # where code lives in the subject's JSON output
+  entry: "{name}"           # required function name (task field)
+  tests_field: tests        # task field: list of assert strings
+  timeout: 15
+  event_map:
+    E_compile: compile       # built-in: code imports and defines entry
+    E_fail: not passed       # built-in: passed = all hidden tests pass
+
+analysis:
+  primary_event: E_fail
+  polarity: minimize         # H1 should minimize failures
+  baselines: [H0_ablate, H_base_len]
+  secondary_events: [E_compile]
+  bootstrap_B: 2000
+
+protocol:
+  R: 3
+  concurrency: 8
+  seed: 12345
+  results_dir: hattr_runs/codegen
