@@ -65,6 +65,7 @@ def analyze_rows(
                     continue
                 p1 = stats.rate(rows, subset, "H1", event)
                 p0 = stats.rate(rows, subset, baseline, event)
+                rrafpf = stats.rr_af_pf(p1, p0)
                 contrasts.append(
                     {
                         "subset": subset,
@@ -75,6 +76,9 @@ def analyze_rows(
                         "RD_CI": stats.bootstrap_diff_ci(
                             rows, subset, "H1", baseline, event, B, rng
                         ),
+                        "RR": rrafpf["RR"],
+                        "AF": rrafpf["AF"],
+                        "PF": rrafpf["PF"],
                     }
                 )
 

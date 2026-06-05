@@ -46,16 +46,20 @@ def render_report(analysis: dict[str, Any], warnings: list[str]) -> str:
     lines.extend(
         [
             "",
-            "## Contrasts",
+            "## Contrasts (attribution magnitude)",
             "",
-            "| subset | event | condition | baseline | RD | RD 95% CI |",
-            "| --- | --- | --- | --- | ---: | --- |",
+            "RD=risk difference (p1-p0), RR=risk ratio (p1/p0), "
+            "AF=attributable fraction 1-1/RR (RR>1), PF=prevented fraction 1-RR (RR<1).",
+            "",
+            "| subset | event | condition | baseline | RD | RD 95% CI | RR | AF | PF |",
+            "| --- | --- | --- | --- | ---: | --- | ---: | ---: | ---: |",
         ]
     )
     for row in analysis["contrasts"]:
         lines.append(
             f"| {row['subset']} | {row['event']} | {row['condition']} | "
-            f"{row['baseline']} | {fmt(row['RD'])} | {fmt(row['RD_CI'])} |"
+            f"{row['baseline']} | {fmt(row['RD'])} | {fmt(row['RD_CI'])} | "
+            f"{fmt(row.get('RR'))} | {fmt(row.get('AF'))} | {fmt(row.get('PF'))} |"
         )
 
     verdict = analysis["verdict"]
