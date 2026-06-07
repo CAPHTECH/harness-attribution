@@ -40,9 +40,17 @@ Attributable / Prevented Fraction = (方向で選ぶ。methodology.md §6 参照
 | --- | --- |
 | `docs/methodology.md` | 方法論の**規範仕様（単一ソース）**: 定義ルール・反事実分類・指標カタログ・実験プロトコル・分析モデル・妥当性脅威・設計原則 |
 | `docs/example-system-prompt-safety.md` | **worked example**: system prompt が安全性（無根拠断定/棄権/過剰拒否/正答率）に与える影響を、上記仕様に従って具体化 |
+| `poc/` | 実証（PoC）。安全性題材（`poc/FINDINGS.md` / `poc/PREREGISTRATION.md`）とコード生成題材（`poc/codegen/`）。事前登録↔結果を記録 |
+| `hattr/` | **ツール v0.1**。config 駆動で (被検体 × 採点器 × 要因 × イベント) を回す。`hattr/README.md` 参照 |
 
-## ステータス / 次の一手
+## ステータス
 
-- [x] 方法論ドキュメント v0.1（本コミット）
-- [ ] worked example を実機で回す**最小 E2E PoC**（手法の弱点＝「反事実が外科的か」を最初に検証）
-- [ ] 実験フレームワーク（ハーネス条件定義 → バッチ生成 → イベント採点 → RR/RD/AF・混合効果・bootstrap CI）
+- [x] 方法論ドキュメント（`docs/`）
+- [x] 最小 E2E PoC（安全性: 確証＋一般化／コード生成: 実行オラクル）— `poc/FINDINGS.md`
+- [x] 実験ツール `hattr`（プロバイダ拡張・本格 sandbox・事前登録・規律ガードレール）
+
+主要な知見・限界は `poc/FINDINGS.md` と各 `PREREGISTRATION.md` に記録。クイックスタートは `hattr/README.md`。
+
+## ライセンス
+
+Apache License 2.0（`LICENSE`）. Copyright 2026 CAPH TECH Inc.（`NOTICE`）.

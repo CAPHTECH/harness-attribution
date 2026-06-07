@@ -1,3 +1,4 @@
 hattr_runs/
 __pycache__/
 *.pyc
+docs/zenn-harness-attribution.md
