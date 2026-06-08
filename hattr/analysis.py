@@ -23,6 +23,9 @@ def analyze_rows(
     cfg: dict[str, Any],
     event_names: list[str],
     seed: int,
+    conditions: tuple[str, ...] = CONDITIONS,
+    condition_roles: dict[str, Any] | None = None,
+    screen: bool = False,
 ) -> dict[str, Any]:
     primary_event = str(cfg["primary_event"])
     polarity = str(cfg.get("polarity", "minimize"))
@@ -34,11 +37,12 @@ def analyze_rows(
     normalized_rows = _with_normalized_primary(rows, primary_event, polarity)
     primary_subset = _first_subset_with_event(rows, primary_event)
     all_events = _unique([primary_event, *secondary_events, *event_names])
+    factual_condition = _screen_role(condition_roles or {}, "factual") if screen else "H1"
 
     rates = []
     for event in all_events:
         for subset in _subsets_for_event(rows, event):
-            for condition in CONDITIONS:
+            for condition in conditions:
                 p = stats.rate(rows, subset, condition, event)
                 ci = stats.bootstrap_rate_ci(rows, subset, condition, event, B, rng)
                 n = sum(
@@ -61,20 +65,20 @@ def analyze_rows(
     for event in all_events:
         for subset in _subsets_for_event(rows, event):
             for baseline in baselines:
-                if baseline not in CONDITIONS:
+                if baseline not in conditions:
                     continue
-                p1 = stats.rate(rows, subset, "H1", event)
+                p1 = stats.rate(rows, subset, factual_condition, event)
                 p0 = stats.rate(rows, subset, baseline, event)
                 rrafpf = stats.rr_af_pf(p1, p0)
                 contrasts.append(
                     {
                         "subset": subset,
                         "event": event,
-                        "condition": "H1",
+                        "condition": factual_condition,
                         "baseline": baseline,
                         "RD": None if p1 is None or p0 is None else p1 - p0,
                         "RD_CI": stats.bootstrap_diff_ci(
-                            rows, subset, "H1", baseline, event, B, rng
+                            rows, subset, factual_condition, baseline, event, B, rng
                         ),
                         "RR": rrafpf["RR"],
                         "AF": rrafpf["AF"],
@@ -82,18 +86,98 @@ def analyze_rows(
                     }
                 )
 
-    verdict = _verdict(normalized_rows, rows, primary_subset, B, seed, baselines, secondary_events)
     errors = sum(stats.as_bool(row.get("error")) is True for row in rows)
-    return {
+    analysis = {
         "rates": rates,
         "contrasts": contrasts,
-        "verdict": verdict,
         "errors": errors,
         "rows": len(rows),
         "primary_event": primary_event,
         "primary_subset": primary_subset,
         "polarity": polarity,
+        "screen": screen,
     }
+    if screen:
+        analysis["triage"] = screen_triage(
+            normalized_rows, cfg, primary_event, primary_subset, condition_roles or {}
+        )
+    else:
+        analysis["verdict"] = _verdict(
+            normalized_rows, rows, primary_subset, B, seed, baselines, secondary_events
+        )
+    return analysis
+
+
+def screen_triage(
+    normalized_rows: list[dict[str, Any]],
+    cfg: dict[str, Any],
+    primary_event: str,
+    subset: str,
+    condition_roles: dict[str, Any],
+) -> dict[str, Any]:
+    screen_cfg = cfg.get("screen", {})
+    floor = float(screen_cfg.get("floor", 0.1)) if isinstance(screen_cfg, dict) else 0.1
+    margin = float(screen_cfg.get("margin", 0.2)) if isinstance(screen_cfg, dict) else 0.2
+    factual = _screen_role(condition_roles, "factual")
+    ablate = _screen_role(condition_roles, "ablate")
+    envelope = _screen_role(condition_roles, "envelope")
+
+    e_f = stats.rate(normalized_rows, subset, factual, NORMALIZED_PRIMARY)
+    e_a = stats.rate(normalized_rows, subset, ablate, NORMALIZED_PRIMARY)
+    e_e = stats.rate(normalized_rows, subset, envelope, NORMALIZED_PRIMARY)
+    rd_vs_ablate = None if e_f is None or e_a is None else e_f - e_a
+    rd_vs_envelope = None if e_f is None or e_e is None else e_f - e_e
+    rr_vs_ablate = stats.rr_af_pf(e_f, e_a)["RR"]
+    rr_vs_envelope = stats.rr_af_pf(e_f, e_e)["RR"]
+
+    rates = [e_f, e_a, e_e]
+    if any(value is None for value in rates):
+        label = "inconclusive"
+        recommendation = "この規模では不確定。n/R を増やすか フル検証へ"
+    elif e_a < floor or min(e_f, e_a, e_e) > 1 - floor:
+        label = "no_headroom"
+        recommendation = (
+            "headroom なし：この課題/被検体では効果が観測できない。"
+            "課題難度か被検体を見直せ"
+        )
+    elif e_f <= e_a - margin and e_f <= e_e - margin:
+        label = "candidate_signal"
+        recommendation = (
+            "シグナルあり：要因が同長フィラーも超えて効いている可能性。"
+            "フル検証（独立判定＋事前登録＋n×R＋bootstrap）を推奨"
+        )
+    elif abs(e_f - e_e) < margin:
+        label = "surface_only"
+        recommendation = (
+            "シグナルなし：要因の\"意味\"でなく長さ/表層の可能性。"
+            "フル検証は優先度低"
+        )
+    else:
+        label = "inconclusive"
+        recommendation = "この規模では不確定。n/R を増やすか フル検証へ"
+
+    return {
+        "label": label,
+        "recommendation": recommendation,
+        "e_factual": e_f,
+        "e_ablate": e_a,
+        "e_envelope": e_e,
+        "rd_vs_ablate": rd_vs_ablate,
+        "rr_vs_ablate": rr_vs_ablate,
+        "rd_vs_envelope": rd_vs_envelope,
+        "rr_vs_envelope": rr_vs_envelope,
+        "primary_event": primary_event,
+        "primary_subset": subset,
+    }
+
+
+def _screen_role(condition_roles: dict[str, Any], role: str) -> str:
+    value = condition_roles.get(role)
+    if value not in CONDITIONS:
+        raise ValueError(
+            f"screen mode requires conditions.{role} to name one of {CONDITIONS}"
+        )
+    return str(value)
 
 
 def _with_normalized_primary(

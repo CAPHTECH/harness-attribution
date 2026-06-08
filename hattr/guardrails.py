@@ -25,12 +25,17 @@ def static_warnings(study: Any) -> list[str]:
 
 def runtime_warnings(analysis: dict[str, Any]) -> list[str]:
     warnings: list[str] = []
-    verdict = analysis.get("verdict", {})
-    rates = [
-        value
-        for value in verdict.get("bad_primary_rates", {}).values()
-        if value is not None
-    ]
+    if analysis.get("screen"):
+        triage = analysis.get("triage", {})
+        rate_values = (
+            triage.get("e_factual"),
+            triage.get("e_ablate"),
+            triage.get("e_envelope"),
+        )
+    else:
+        verdict = analysis.get("verdict", {})
+        rate_values = tuple(verdict.get("bad_primary_rates", {}).values())
+    rates = [value for value in rate_values if value is not None]
     if rates and max(rates) - min(rates) <= 0.01:
         warnings.append(
             "headroom: primary event rates are nearly identical across conditions."
@@ -53,4 +58,3 @@ def _adapter_model(cfg: dict[str, Any]) -> tuple[str | None, str | None]:
     if adapter == "codex" and model is None:
         model = "gpt-5.5"
     return (str(adapter) if adapter is not None else None, str(model) if model else None)
-

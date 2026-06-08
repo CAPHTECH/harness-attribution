@@ -16,7 +16,12 @@ from .scorers.registry import get_scorer
 from .subjects.registry import get_subject
 
 
-def run_study(study: StudyConfig, limit: int | None = None, mock: bool = False) -> dict[str, Any]:
+def run_study(
+    study: StudyConfig,
+    limit: int | None = None,
+    mock: bool = False,
+    screen: bool = False,
+) -> dict[str, Any]:
     started = time.perf_counter()
     results_dir = study.results_dir
     raw_dir = results_dir / "raw"
@@ -33,12 +38,14 @@ def run_study(study: StudyConfig, limit: int | None = None, mock: bool = False) 
     subset_field = study.tasks.get("subset_field")
     subject = None if mock else get_subject(study.subject)
     scorer = get_scorer(study.scorer)
+    conditions = _screen_conditions(study) if screen else CONDITIONS
+    r = 1 if screen else study.r
 
     jobs = [
         (task, condition, sample_id)
         for task in tasks
-        for condition in CONDITIONS
-        for sample_id in range(1, study.r + 1)
+        for condition in conditions
+        for sample_id in range(1, r + 1)
     ]
     rows: list[dict[str, Any]] = []
     max_workers = max(1, study.concurrency)
@@ -65,8 +72,16 @@ def run_study(study: StudyConfig, limit: int | None = None, mock: bool = False) 
     rows.sort(key=lambda row: (str(row["question_id"]), str(row["condition"]), int(row["sample_id"])))
     event_names = list(getattr(scorer, "event_names", []))
     analysis_cfg = dict(study.analysis)
-    analysis_cfg.setdefault("bootstrap_B", study.bootstrap_B)
-    analysis = analyze_rows(rows, analysis_cfg, event_names, study.seed)
+    analysis_cfg["bootstrap_B"] = 0 if screen else study.bootstrap_B
+    analysis = analyze_rows(
+        rows,
+        analysis_cfg,
+        event_names,
+        study.seed,
+        conditions=conditions,
+        condition_roles=study.conditions,
+        screen=screen,
+    )
     warnings = [*warnings, *runtime_warnings(analysis)]
     emit(runtime_warnings(analysis))
 
@@ -74,16 +89,38 @@ def run_study(study: StudyConfig, limit: int | None = None, mock: bool = False) 
         "study": study.name,
         "study_path": str(study.path),
         "mock": mock,
+        "screen": screen,
         "limit": limit,
-        "R": study.r,
+        "R": r,
         "tasks": len(tasks),
         "total_rows": len(rows),
         "duration_s": time.perf_counter() - started,
-        "verdict": analysis["verdict"]["verdict"],
         "results_dir": str(results_dir),
     }
+    if screen:
+        meta["triage"] = analysis["triage"]["label"]
+        meta["conditions"] = list(conditions)
+    else:
+        meta["verdict"] = analysis["verdict"]["verdict"]
     write_outputs(results_dir, rows, analysis, warnings, meta)
     return {"rows": rows, "analysis": analysis, "warnings": warnings, "meta": meta}
+
+
+def _screen_conditions(study: StudyConfig) -> tuple[str, str, str]:
+    missing = [
+        role
+        for role in ("factual", "ablate", "envelope")
+        if study.conditions.get(role) not in CONDITIONS
+    ]
+    if missing:
+        raise ValueError(
+            "screen mode requires conditions roles: "
+            f"{', '.join(missing)} must name one of {CONDITIONS}"
+        )
+    factual = str(study.conditions["factual"])
+    ablate = str(study.conditions["ablate"])
+    envelope = str(study.conditions["envelope"])
+    return (factual, ablate, envelope)
 
 
 def _run_one(

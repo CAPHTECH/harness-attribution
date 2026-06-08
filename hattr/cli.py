@@ -17,6 +17,7 @@ def main() -> None:
     run_parser.add_argument("study")
     run_parser.add_argument("--limit", type=int, default=None)
     run_parser.add_argument("--mock", action="store_true")
+    run_parser.add_argument("--screen", action="store_true")
 
     prereg_parser = sub.add_parser("preregister")
     prereg_parser.add_argument("study")
@@ -30,12 +31,19 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "run":
         study = load_study(args.study)
-        result = run_study(study, limit=args.limit, mock=args.mock)
-        print(
-            f"wrote {result['meta']['results_dir']}; "
-            f"verdict={result['analysis']['verdict']['verdict']}; "
-            f"errors={result['analysis']['errors']}/{result['analysis']['rows']}"
-        )
+        result = run_study(study, limit=args.limit, mock=args.mock, screen=args.screen)
+        if args.screen:
+            print(
+                f"wrote {result['meta']['results_dir']}; "
+                f"triage={result['analysis']['triage']['label']}; "
+                f"errors={result['analysis']['errors']}/{result['analysis']['rows']}"
+            )
+        else:
+            print(
+                f"wrote {result['meta']['results_dir']}; "
+                f"verdict={result['analysis']['verdict']['verdict']}; "
+                f"errors={result['analysis']['errors']}/{result['analysis']['rows']}"
+            )
     elif args.command == "preregister":
         study = load_study(args.study)
         out = preregister(Path(args.study).resolve(), study.raw, args.timestamp)

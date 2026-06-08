@@ -62,27 +62,59 @@ def render_report(analysis: dict[str, Any], warnings: list[str]) -> str:
             f"{fmt(row.get('RR'))} | {fmt(row.get('AF'))} | {fmt(row.get('PF'))} |"
         )
 
-    verdict = analysis["verdict"]
-    lines.extend(
-        [
-            "",
-            "## Verdict",
-            "",
-            f"- verdict: `{verdict['verdict']}`",
-            f"- primary: `{verdict['primary']}`",
-            f"- primary_event: `{analysis['primary_event']}`",
-            f"- primary_subset: `{analysis['primary_subset']}`",
-            f"- polarity: `{analysis['polarity']}`",
-            f"- tradeoff_flag: `{verdict['tradeoff_flag']}`",
-            f"- H1 - H_base_len CI on normalized primary: {fmt(verdict['h1_minus_base_len_ci'])}",
-            f"- H1 - H_para CI on normalized primary: {fmt(verdict['h1_minus_para_ci'])}",
-            f"- H_contra is max normalized primary: {verdict['contra_is_max_bad_primary']}",
-            "",
-            "## Exclusions",
-            "",
-            f"- error rows excluded from rate calculations: {analysis['errors']} / {analysis['rows']}",
-        ]
-    )
+    if analysis.get("screen"):
+        triage = analysis["triage"]
+        lines.extend(
+            [
+                "",
+                "## Screen (triage)",
+                "",
+                "| condition role | normalized primary rate |",
+                "| --- | ---: |",
+                f"| factual | {fmt(triage['e_factual'])} |",
+                f"| ablate | {fmt(triage['e_ablate'])} |",
+                f"| envelope | {fmt(triage['e_envelope'])} |",
+                "",
+                "| comparison | RD | RR |",
+                "| --- | ---: | ---: |",
+                f"| factual vs ablate | {fmt(triage['rd_vs_ablate'])} | {fmt(triage['rr_vs_ablate'])} |",
+                f"| factual vs envelope | {fmt(triage['rd_vs_envelope'])} | {fmt(triage['rr_vs_envelope'])} |",
+                "",
+                f"- triage: `{triage['label']}`",
+                f"- recommendation: {triage['recommendation']}",
+                f"- primary_event: `{analysis['primary_event']}`",
+                f"- primary_subset: `{analysis['primary_subset']}`",
+                f"- polarity: `{analysis['polarity']}`",
+                "- note: これは探索的トリアージであり結論ではない。"
+                "`candidate_signal` は『フル検証へ進め』の意味で『効果あり』ではない。",
+                "",
+                "## Exclusions",
+                "",
+                f"- error rows excluded from rate calculations: {analysis['errors']} / {analysis['rows']}",
+            ]
+        )
+    else:
+        verdict = analysis["verdict"]
+        lines.extend(
+            [
+                "",
+                "## Verdict",
+                "",
+                f"- verdict: `{verdict['verdict']}`",
+                f"- primary: `{verdict['primary']}`",
+                f"- primary_event: `{analysis['primary_event']}`",
+                f"- primary_subset: `{analysis['primary_subset']}`",
+                f"- polarity: `{analysis['polarity']}`",
+                f"- tradeoff_flag: `{verdict['tradeoff_flag']}`",
+                f"- H1 - H_base_len CI on normalized primary: {fmt(verdict['h1_minus_base_len_ci'])}",
+                f"- H1 - H_para CI on normalized primary: {fmt(verdict['h1_minus_para_ci'])}",
+                f"- H_contra is max normalized primary: {verdict['contra_is_max_bad_primary']}",
+                "",
+                "## Exclusions",
+                "",
+                f"- error rows excluded from rate calculations: {analysis['errors']} / {analysis['rows']}",
+            ]
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -109,4 +141,3 @@ def _csv_value(value: Any) -> Any:
     if isinstance(value, (dict, list)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
     return value
-
